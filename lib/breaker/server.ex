@@ -4,32 +4,40 @@ defmodule Breaker.Server do
 
   # Client API
 
-  def start_link(answer \\ nil) do
+  def child_spec(name) do
+    %{id: name, start: {Breaker.Server, :start_link, [name]}}
+  end
+
+  def start_link(name) when is_atom(name) do
+    GenServer.start_link(__MODULE__, name, name: name)
+  end
+
+  def start_link(answer) when is_list(answer) do
     GenServer.start_link(__MODULE__, answer, name: __MODULE__)
   end
 
-  def crash do
-    GenServer.cast(__MODULE__, :crash)
+  def crash(pid \\ __MODULE__) do
+    GenServer.cast(pid, :crash)
   end
 
-  def take_turn(guess) do
-    GenServer.call(__MODULE__, {:take_turn, guess})
+  def take_turn(pid \\ __MODULE__, guess) do
+    GenServer.call(pid, {:take_turn, guess})
     |> IO.puts()
   end
 
-  def show do
-    GenServer.call(__MODULE__, :show)
+  def show(pid \\ __MODULE__) do
+    GenServer.call(pid, :show)
   end
 
-  def restart(answer \\ nil) do
-    GenServer.call(__MODULE__, {:restart, answer})
+  def restart(pid \\ __MODULE__, answer \\ nil) do
+    GenServer.call(pid, {:restart, answer})
   end
 
   # Server Callbacks
 
   @impl GenServer
-  def init(nil) do
-    IO.puts("Starting new game...")
+  def init(name) when is_atom(name) do
+    IO.puts("Starting new game for #{name}...")
     {:ok, Game.new()}
   end
 
