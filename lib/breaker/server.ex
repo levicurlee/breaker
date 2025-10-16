@@ -1,7 +1,8 @@
 defmodule Breaker.Server do
   use GenServer
   alias Breaker.Game
-
+  #TODO: via tuple
+  #TODO: trapping exits
   # Client API
 
   def child_spec(name) do
